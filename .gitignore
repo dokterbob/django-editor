@@ -11,4 +11,7 @@ tmp
 build
 dist
 .idea
+
+# django-setuptest
 pep8.txt
+coverage.xml
