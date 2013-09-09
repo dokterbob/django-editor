@@ -27,14 +27,14 @@ class EditorPreset(object):
 
         from django.contrib import admin
 
-        return admin.TabularInline
+        return admin.StackedInline
 
     def get_tabularinline_admin(self):
         """ Get TabularInline admin base class. """
 
         from django.contrib import admin
 
-        return admin.StackedInline
+        return admin.TabularInline
 
     def get_widget(self):
         """ Get Widget class for editor. """
@@ -100,9 +100,23 @@ class TinyMCEPreset(EditorPreset):
         return TinyMCEAdmin
 
     def get_admin(self):
-        """ Get admin base class. """
+        """ Wrap admin base class. """
 
         super_admin = super(TinyMCEPreset, self).get_admin()
+
+        return self._admin_wrapper(super_admin)
+
+    def get_stackedinline_admin(self):
+        """ Wrap admin base class. """
+
+        super_admin = super(TinyMCEPreset, self).get_stackedinline_admin()
+
+        return self._admin_wrapper(super_admin)
+
+    def get_tabularinline_admin(self):
+        """ Wrap admin base class. """
+
+        super_admin = super(TinyMCEPreset, self).get_tabularinline_admin()
 
         return self._admin_wrapper(super_admin)
 

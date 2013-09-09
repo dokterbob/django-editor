@@ -39,20 +39,24 @@ class Settings(object):
         if attr.isupper():
             # Require settings to have uppercase characters
 
-            setting = getattr(
-                django_settings,
-                '%s_%s' % (self.settings_prefix, attr),
-                None
-            )
-
-            if not setting and not attr.startswith('DEFAULT_'):
-                setting = getattr(self, 'DEFAULT_%s' % attr)
+            try:
+                setting = getattr(
+                    django_settings,
+                    '%s_%s' % (self.settings_prefix, attr),
+                )
+            except AttributeError:
+                if not attr.startswith('DEFAULT_'):
+                    setting = getattr(self, 'DEFAULT_%s' % attr)
+                else:
+                    raise
 
             return setting
 
         else:
             # Default behaviour
-            raise AttributeError
+            raise AttributeError(
+                'No setting or default available for \'%s\'' % attr
+            )
 
 
 class EditorSettings(Settings):
@@ -95,7 +99,12 @@ class EditorSettings(Settings):
 
         # Get preset from Django settings
         try:
-            configured_preset = super(EditorSettings, self).PRESET
+            # Get the preset by hand because somehow __getattr__ does not get
+            # called in the superclass if we request 'super(EditorSettings, self).PRESET'
+            configured_preset = getattr(
+                django_settings,
+                'EDITOR_PRESET'
+            )
 
             return self._get_preset_instance(configured_preset)
 

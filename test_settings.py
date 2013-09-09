@@ -10,7 +10,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
-    'editor',
+    'imperavi',
+    'tinymce',
+    'editor'
 ]
 
 SITE_ID = 1
