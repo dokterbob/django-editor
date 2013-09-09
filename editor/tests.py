@@ -132,11 +132,15 @@ tinymce_installed_apps = [
     app for app in settings.INSTALLED_APPS if app != 'imperavi'
 ]
 
+
 @override_settings(INSTALLED_APPS=tinymce_installed_apps)
 class TinyMCETests(EditorTestBase):
     """ Tests with just TinyMCE available. """
 
-    def test_admin(self):
+    def test_classes(self):
+        """
+        Test whether all classes for TinyMCE are as they should be.
+        """
         from tinymce.widgets import TinyMCE
 
         self.assertWidget(widget=TinyMCE)
@@ -155,11 +159,16 @@ imperavi_installed_apps = [
     app for app in settings.INSTALLED_APPS if app != 'tinymce'
 ]
 
+
 @override_settings(INSTALLED_APPS=imperavi_installed_apps)
 class ImperaviTests(EditorTestBase):
     """ Tests with just Imperavi available. """
 
-    def test_admin(self):
+    def test_classes(self):
+        """
+        Test whether all classes for Imperavi are as they should be.
+        """
+
         from imperavi.admin import (
             ImperaviAdmin,
             ImperaviStackedInlineAdmin,

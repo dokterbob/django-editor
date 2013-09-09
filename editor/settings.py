@@ -7,8 +7,8 @@ from .utils import Singleton
 
 class Settings(object):
     """
-    A settings object that proxies settings and handles defaults,
-    inspired by `django-appconf` and the way it works in `django-rest-framework`.
+    A settings object that proxies settings and handles defaults, inspired
+    by `django-appconf` and the way it works  in `django-rest-framework`.
 
     By default, a single instance of this class is created as `<app>_settings`,
     from which `<APP>_SETTING_NAME` can be accessed as `SETTING_NAME`, i.e.::
@@ -28,12 +28,12 @@ class Settings(object):
         """
         Assert app-specific prefix.
         """
-        assert hasattr(self, 'settings_prefix'), 'No settings prefix specified.'
+        assert hasattr(self, 'settings_prefix'), 'No prefix specified.'
 
     def __getattr__(self, attr):
         """
-        Return Django setting `PREFIX_SETTING` if explicitly specified, otherwise
-        return `PREFIX_SETTING_DEFAULT` if specified.
+        Return Django setting `PREFIX_SETTING` if explicitly specified,
+        otherwise return `PREFIX_SETTING_DEFAULT` if specified.
         """
 
         if attr.isupper():
@@ -93,14 +93,15 @@ class EditorSettings(Settings):
     @property
     def PRESET(self):
         """
-        Editor preset is a selection from several available preset configurations
-        for editors. Returns a preset object.
+        Editor preset is a selection from several available preset
+        configurations for editors. Returns a preset object.
         """
 
         # Get preset from Django settings
         try:
             # Get the preset by hand because somehow __getattr__ does not get
-            # called in the superclass if we request 'super(EditorSettings, self).PRESET'
+            # called in the superclass if we request
+            # super(EditorSettings, self).PRESET instead
             configured_preset = getattr(
                 django_settings,
                 'EDITOR_PRESET'
