@@ -5,6 +5,10 @@ from django.test import TestCase
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
+from django.db import models
+from django import forms
+from django.contrib import admin
+
 from .settings import editor_settings
 from .presets import EditorPreset
 
@@ -43,8 +47,11 @@ class EditorTestBase(TestCase):
     def assertWidget(self, widget):
         self.assertEquals(widget, self.preset.get_widget())
 
+    def assertModelField(self, field):
+        self.assertEquals(field, self.preset.get_model_field())
 
-class CommonTests(TestCase):
+
+class CommonTests(EditorTestBase):
     def test_settings(self):
         """ Common tests of default test setup (all editors available). """
 
@@ -54,14 +61,45 @@ class CommonTests(TestCase):
             ('editor.presets.imperavi', 'editor.presets.tinymce')
         )
 
-        # Current preset instance of EditorPreset
-        self.assertIsInstance(editor_settings.PRESET, EditorPreset)
-
         # Nonexistent settings should yield an AttributeError
         self.assertRaises(AttributeError, lambda: editor_settings.BANANA)
 
         # Nonsetting (non-uppercased) attrbutes should do the same
         self.assertRaises(AttributeError, lambda: editor_settings.baNANA)
+
+    def test_preset_classes(self):
+        """ Test preset classes. """
+
+        # Current preset instance of EditorPreset
+        self.assertIsInstance(editor_settings.PRESET, EditorPreset)
+
+        # Assert widget class
+        self.assertIsSubclass(
+            editor_settings.PRESET.get_widget(), forms.Widget
+        )
+
+        # Assert model field
+        self.assertIsSubclass(
+            editor_settings.PRESET.get_model_field(), models.TextField
+        )
+
+        # Assert admin
+        self.assertIsSubclass(
+            editor_settings.PRESET.get_admin(), admin.ModelAdmin
+        )
+
+        # Assert inlines, if defined
+        if editor_settings.PRESET.get_tabularinline_admin() != NotImplemented:
+            self.assertIsSubclass(
+                editor_settings.PRESET.get_tabularinline_admin(),
+                admin.TabularInline
+            )
+
+        if editor_settings.PRESET.get_stackedinline_admin() != NotImplemented:
+            self.assertIsSubclass(
+                editor_settings.PRESET.get_stackedinline_admin(),
+                admin.StackedInline
+            )
 
     @override_settings(EDITOR_PRESETS=())
     def test_no_presets(self):
@@ -144,16 +182,17 @@ class TinyMCETests(EditorTestBase):
         Test whether all classes for TinyMCE are as they should be.
         """
         from tinymce.widgets import TinyMCE
+        from tinymce.models import HTMLField
 
         self.assertWidget(widget=TinyMCE)
-
-        from django.contrib import admin
 
         self.assertAdmin(
             admin=admin.ModelAdmin,
             stackedinline=admin.StackedInline,
             tabularinline=admin.TabularInline
         )
+
+        self.assertModelField(field=HTMLField)
 
 
 @unittest.skipUnless(
@@ -231,4 +270,13 @@ class ImperaviTests(EditorTestBase):
         # Tabular inlines are not available
         self.assertEquals(
             self.preset.get_tabularinline_admin(), NotImplemented
+        )
+
+        # Assert field widget
+        model_field = self.preset.get_model_field()
+        form_field = model_field().formfield()
+
+        self.assertIsInstance(
+            form_field.widget,
+            ImperaviWidget
         )

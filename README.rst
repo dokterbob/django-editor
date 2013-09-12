@@ -42,6 +42,11 @@ Here are some examples on how to easily turn your Textareas into WYSIWYG editors
     from django.contrib import admin
     from editor.admin import EditorAdmin, EditorStackedInline
     from editor.widgets import EditorWidget
+    from editor.fields import EditorField
+
+
+    class MyModel(models.Model): # Model field example
+        html_field = EditorField()
 
 
     class MyInlineAdmin(EditorStackedInline): # StackedInline example

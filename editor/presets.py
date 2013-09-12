@@ -43,6 +43,13 @@ class EditorPreset(object):
 
         return Textarea
 
+    def get_model_field(self):
+        """ Get model Field for editor. """
+
+        from django.db.models import TextField
+
+        return TextField
+
     def __str__(self):
         """ String representation is the name. """
         assert hasattr(self, 'name'), 'No name configured for preset.'
@@ -80,6 +87,22 @@ class ImperaviPreset(EditorPreset):
         from imperavi.widget import ImperaviWidget
 
         return ImperaviWidget
+
+    def get_model_field(self):
+        """ Return Imperavi model field. """
+
+        super_field = super(ImperaviPreset, self).get_model_field()
+        widget = self.get_widget()
+
+        class HTMLField(super_field):
+            def formfield(self, **kwargs):
+                # Override the default widget
+                defaults = {'widget': widget}
+                defaults.update(kwargs)
+
+                return super(HTMLField, self).formfield(**defaults)
+
+        return HTMLField
 
 
 class TinyMCEPreset(EditorPreset):
@@ -126,6 +149,13 @@ class TinyMCEPreset(EditorPreset):
         from tinymce.widgets import TinyMCE
 
         return TinyMCE
+
+    def get_model_field(self):
+        """ Return TinyMCE model field. """
+
+        from tinymce.models import HTMLField
+
+        return HTMLField
 
 
 # Instances of preset singletons
