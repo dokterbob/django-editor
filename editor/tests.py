@@ -1,3 +1,5 @@
+import unittest
+
 from django.test.utils import override_settings
 
 from django.test import TestCase
@@ -43,7 +45,7 @@ class EditorTestBase(TestCase):
         self.assertEquals(widget, self.preset.get_widget())
 
 
-class PresetTests(TestCase):
+class CommonTests(TestCase):
     def test_settings(self):
         """ Common tests of default test setup (all editors available). """
 
@@ -56,14 +58,55 @@ class PresetTests(TestCase):
         # Current preset instance of EditorPreset
         self.assertIsInstance(editor_settings.PRESET, EditorPreset)
 
-        # Current instance name Imperavi
-        self.assertEquals(editor_settings.PRESET.name, 'django-imperavi')
-
         # Nonexistent settings should yield an AttributeError
         self.assertRaises(AttributeError, lambda: editor_settings.BANANA)
 
         # Nonsetting (non-uppercased) attrbutes should do the same
         self.assertRaises(AttributeError, lambda: editor_settings.baNANA)
+
+    @override_settings(EDITOR_PRESETS=())
+    def test_no_presets(self):
+        """ Test with no presets. """
+
+        # Presets should be overridden
+        self.assertEquals(
+            editor_settings.PRESETS,
+            ()
+        )
+
+        # Should raise an error
+        self.assertRaises(ImproperlyConfigured, lambda: editor_settings.PRESET)
+
+        # Still, overriding the preset should work, ignoring presets
+        # self.test_preset_override()
+
+    @override_settings(EDITOR_PRESET='banana.juice')
+    def test_wrong_preset(self):
+        """ Test nonexistent preset. """
+
+        # Override should be set
+        self.assertEquals(
+            settings.EDITOR_PRESET,
+            'banana.juice'
+        )
+
+        # Should raise an error
+        self.assertRaises(ImproperlyConfigured, lambda: editor_settings.PRESET)
+
+
+@unittest.skipUnless(
+    # Only run tests when TinyMCE is available
+    'tinymce' in settings.INSTALLED_APPS,
+    'django-tinymce not available for testing.'
+)
+@override_settings(
+    # Filter imperavi from editors so just tinymce is left
+    INSTALLED_APPS=filter(
+        lambda app: app != 'imperavi', settings.INSTALLED_APPS
+    )
+)
+class TinyMCETests(EditorTestBase):
+    """ Tests with just TinyMCE available. """
 
     @override_settings(EDITOR_PRESETS=('editor.presets.tinymce', ))
     def test_presets_override(self):
@@ -81,22 +124,6 @@ class PresetTests(TestCase):
         # This should cause TinyMCE to be used
         self.assertEquals(editor_settings.PRESET.name, 'django-tinymce')
 
-    @override_settings(EDITOR_PRESETS=())
-    def test_no_presets(self):
-        """ Test with no presets. """
-
-        # Presets should be overridden
-        self.assertEquals(
-            editor_settings.PRESETS,
-            ()
-        )
-
-        # Should raise an error
-        self.assertRaises(ImproperlyConfigured, lambda: editor_settings.PRESET)
-
-        # Still, overriding the preset should work, ignoring presets
-        self.test_preset_override()
-
     @override_settings(EDITOR_PRESET='editor.presets.tinymce')
     def test_preset_override(self):
         """ Test preset override. """
@@ -112,30 +139,6 @@ class PresetTests(TestCase):
 
         # This should cause TinyMCE to be used
         self.assertEquals(editor_settings.PRESET.name, 'django-tinymce')
-
-    @override_settings(EDITOR_PRESET='banana.juice')
-    def test_wrong_preset(self):
-        """ Test nonexistent preset. """
-
-        # Override should be set
-        self.assertEquals(
-            settings.EDITOR_PRESET,
-            'banana.juice'
-        )
-
-        # Should raise an error
-        self.assertRaises(ImproperlyConfigured, lambda: editor_settings.PRESET)
-
-
-# List of apps with just tinymce as editor
-tinymce_installed_apps = [
-    app for app in settings.INSTALLED_APPS if app != 'imperavi'
-]
-
-
-@override_settings(INSTALLED_APPS=tinymce_installed_apps)
-class TinyMCETests(EditorTestBase):
-    """ Tests with just TinyMCE available. """
 
     def test_classes(self):
         """
@@ -154,15 +157,57 @@ class TinyMCETests(EditorTestBase):
         )
 
 
-# List of apps with just imperavi as editor
-imperavi_installed_apps = [
-    app for app in settings.INSTALLED_APPS if app != 'tinymce'
-]
-
-
-@override_settings(INSTALLED_APPS=imperavi_installed_apps)
+@unittest.skipUnless(
+    # Only run tests when TinyMCE is available
+    'imperavi' in settings.INSTALLED_APPS,
+    'django-imperavi not available for testing.'
+)
+@override_settings(
+    # Filter tinymce from editors so just imparavi is left
+    INSTALLED_APPS=filter(
+        lambda app: app != 'tinymce', settings.INSTALLED_APPS
+    )
+)
 class ImperaviTests(EditorTestBase):
     """ Tests with just Imperavi available. """
+
+    def test_default_preset(self):
+        """ Default preset should be imperavi. """
+
+        # Current instance name Imperavi
+        self.assertEquals(editor_settings.PRESET.name, 'django-imperavi')
+
+    @override_settings(EDITOR_PRESETS=('editor.presets.imperavi', ))
+    def test_presets_override(self):
+        """ Test preset override. """
+
+        # Presets should be overridden
+        self.assertEquals(
+            editor_settings.PRESETS,
+            ('editor.presets.imperavi', )
+        )
+
+        # Current preset instance of EditorPreset
+        self.assertIsInstance(editor_settings.PRESET, EditorPreset)
+
+        # This should cause TinyMCE to be used
+        self.assertEquals(editor_settings.PRESET.name, 'django-imperavi')
+
+    @override_settings(EDITOR_PRESET='editor.presets.imperavi')
+    def test_preset_override(self):
+        """ Test preset override. """
+
+        # Override should be set
+        self.assertEquals(
+            settings.EDITOR_PRESET,
+            'editor.presets.imperavi'
+        )
+
+        # Current preset instance of EditorPreset
+        self.assertIsInstance(editor_settings.PRESET, EditorPreset)
+
+        # This should cause TinyMCE to be used
+        self.assertEquals(editor_settings.PRESET.name, 'django-imperavi')
 
     def test_classes(self):
         """
