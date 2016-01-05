@@ -1,8 +1,8 @@
 Django-editor
 ==========================
 
-.. image:: https://travis-ci.org/littlepea/django-editor.png?branch=master
-    :target: http://travis-ci.org/littlepea/django-editor
+.. image:: https://travis-ci.org/dokterbob/django-editor.png?branch=master
+    :target: http://travis-ci.org/dokterbob/django-editor
 
 Allows pluggable WYSIWYG editors in django admin without hard dependencies.
 
