@@ -18,7 +18,7 @@ Installation
 
     pip install django-editor
 
-2. (optional) Add `imperavi` or `tinymce` to your INSTALLED_APPS in `settings.py`::
+2. Add `imperavi` or `tinymce` to your INSTALLED_APPS in `settings.py`::
 
     INSTALLED_APPS = (
         ...
@@ -31,16 +31,22 @@ Usage
 
 `editor` package gives you the following replacement classes:
 
-* `django.forms.widgets.Textarea` => `editor.EditorWidget` (becomes `ImperaviWidget` or `TinyMCE`)
-* `django.contrib.admin.ModelAdmin` => `editor.EditorAdmin` (becomes `ImperaviAdmin` or stays as `ModelAdmin`)
-* `django.contrib.admin.StackedInline` => `editor.EditorStackedInline` (becomes `ImperaviStackedInline` or stays as `StackedInline`)
+* `django.forms.widgets.Textarea` => `editor.widgets.EditorWidget` (becomes `ImperaviWidget` or `TinyMCE`)
+* `django.contrib.admin.ModelAdmin` => `editor.admin.EditorAdmin` (becomes `ImperaviAdmin` or stays as `ModelAdmin`)
+* `django.contrib.admin.StackedInline` => `editor.admin.EditorStackedInline` (becomes `ImperaviStackedInline` or stays as `StackedInline`)
 
 Here are some examples on how to easily turn your Textareas into WYSIWYG editors::
 
     # admin.py
     from django.db import models
     from django.contrib import admin
-    from editor.admin import EditorAdmin, EditorWidget, EditorStackedInline
+    from editor.admin import EditorAdmin, EditorStackedInline
+    from editor.widgets import EditorWidget
+    from editor.fields import EditorField
+
+
+    class MyModel(models.Model): # Model field example
+        html_field = EditorField()
 
 
     class MyInlineAdmin(EditorStackedInline): # StackedInline example
@@ -59,6 +65,21 @@ Here are some examples on how to easily turn your Textareas into WYSIWYG editors
         }
 
     admin.site.register(Model3, MyModel3Admin)
+
+Optional configuration
+----------------------
+By default, `django-editor` checks for available editors, preferring imperavi
+over TinyMCE. This mechanism is however fully configurable and extendable
+through settings:
+
+`EDITOR_PRESETS`
+    An ordered list of EditorPreset modules defining usable editors.
+    Defaults to: `('editor.presets.imperavi', 'editor.presets.tinymce')`
+
+`EDITOR_PRESET`
+    Setting used to set the preset, bypassing the `EDITOR_PRESETS` setting
+    altogether. When not set explicitly, the first available preset from
+    `EDITOR_PRESETS` is used.
 
 Credits
 -------

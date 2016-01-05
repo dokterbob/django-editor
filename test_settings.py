@@ -4,13 +4,23 @@ DATABASES = {
     }
 }
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
-    'editor',
-)
+    'imperavi',
+    'tinymce',
+    'editor'
+]
 
 SITE_ID = 1
+
+try:
+    # If available, South is required by setuptest
+    import south
+    INSTALLED_APPS.append('south')
+except ImportError:
+    # South not installed and hence is not required
+    pass
